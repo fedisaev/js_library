@@ -7,7 +7,6 @@ export class Header extends DivComponent {
     }
 
     render() {
-        this.element.innerHTML = '';
         this.element.classList.add('header');
         this.element.innerHTML = `
             <div>

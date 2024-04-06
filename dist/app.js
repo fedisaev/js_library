@@ -1123,7 +1123,6 @@
         }
 
         render() {
-            this.element.innerHTML = '';
             this.element.classList.add('header');
             this.element.innerHTML = `
             <div>
@@ -1147,6 +1146,59 @@
         }
     }
 
+    class Search extends DivComponent {
+        constructor(state) {
+            super();
+            this.state = state;
+        }
+
+        search() {
+            this.state.searchQuery = this.element.querySelector('input').value;
+        }
+
+        render() {
+            this.element.classList.add('search');
+            this.element.innerHTML = `
+           <div class="search__wrapper">
+                <input type="text" 
+                       placeholder="Find a book or an author...."
+                       class="search__input"
+                       value="${this.state?.searchQuery ? this.state.searchQuery : ''}"
+                />
+                <img src="/static/search.svg" alt="Search icon">
+           </div>
+           <button aria-label="Search"><img src="/static/search-white.svg" alt="Search icon"></button>
+       `;
+            this.element.querySelector('button').addEventListener('click', this.search.bind(this));
+            this.element.querySelector('input').addEventListener('keydown', e=>{
+                if (e.code === 'Enter'){
+                    this.search();
+                }
+            });
+            return this.element;
+        }
+    }
+
+    class CardList extends DivComponent {
+        constructor(appState, parentState) {
+            super();
+            this.appState = appState;
+            this.parentState = parentState;
+        }
+
+        render() {
+            if (this.parentState.loading) {
+                this.element.innerHTML = `<div class="card_list__loader">Loading...</div>`;
+                return this.element;
+            }
+            this.element.classList.add('card_list');
+            this.element.innerHTML = `
+            <h1>Books found - ${this.parentState.list.length}</h1>
+        `;
+            return this.element;
+        }
+    }
+
     class MainView extends AbstractView {
         state = {
             list: [],
@@ -1159,6 +1211,7 @@
             super();
             this.appState = appState;
             this.appState = onChange(this.appState, this.appStateHook.bind(this));
+            this.state = onChange(this.state, this.stateHook.bind(this));
             this.setTitle('Book search');
         }
 
@@ -1168,8 +1221,27 @@
             }
         }
 
+        async stateHook(path) {
+            if (path === 'searchQuery') {
+                this.state.loading = true;
+                const data = await this.loadList(this.state.searchQuery, this.state.offset);
+                this.state.loading = false;
+                this.state.list = data.docs;
+            }
+            if (path === 'list' || path === 'loading') {
+                this.render();
+            }
+        }
+
+        async loadList(q, offset) {
+            const res = await fetch(`https://openlibrary.org/search.json?q=${q}&offset=${offset}`);
+            return res.json();
+        }
+
         render() {
             const main = document.createElement('div');
+            main.append(new Search(this.state).render());
+            main.append(new CardList(this.appState, this.state).render());
             this.app.innerHTML = '';
             this.app.append(main);
             this.renderHeader();
