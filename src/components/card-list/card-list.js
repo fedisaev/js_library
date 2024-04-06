@@ -14,12 +14,11 @@ export class CardList extends DivComponent {
             this.element.innerHTML = `<div class="card_list__loader">Loading...</div>`;
             return this.element;
         }
-        this.element.classList.add('card_list');
-        this.element.innerHTML = `
-            <h1>Books found - ${this.parentState.numFound}</h1>
-        `;
+        const cardGrid = document.createElement('div');
+        cardGrid.classList.add('card_grid');
+        this.element.append(cardGrid);
         for (const card of this.parentState.list) {
-            this.element.append(new Card(this.appState, card).render());
+            cardGrid.append(new Card(this.appState, card).render());
         }
         return this.element;
     }

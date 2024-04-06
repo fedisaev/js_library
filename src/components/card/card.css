@@ -6,7 +6,7 @@
 }
 
 .card__image {
-    background: #888888;
+    background: #B8B8B8;
     display: flex;
     padding-top: 10px;
     justify-content: center;
@@ -19,8 +19,8 @@
     flex-direction: column;
     background: var(--black);
     color: var(--white);
-    min-height: 150px;
     padding: 10px;
+    min-height: 150px;
 }
 
 .card__tag {
@@ -31,7 +31,7 @@
 }
 
 .card__name {
-    font-weight: 300;
+    font-weight: 600;
     font-size: 15px;
     line-height: 110%;
     margin-bottom: 8px;
@@ -49,18 +49,18 @@
 }
 
 .button__add {
+    border-radius: 6px;
     width: 36px;
     height: 32px;
-    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: none;
-    cursor: pointer;
     border: 1px solid var(--white);
+    cursor: pointer;
 }
 
-.button__active{
+.button__active {
     background: var(--white);
 }
 
