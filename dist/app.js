@@ -1179,6 +1179,46 @@
         }
     }
 
+    class Card extends DivComponent {
+        constructor(appState, cardState) {
+            super();
+            this.appState = appState;
+            this.cardState = cardState;
+        }
+
+        render() {
+            this.element.classList.add('card');
+            const existInFavorites = this.appState.favorites.find(
+                b => b.key === this.cardState.key
+            );
+            this.element.innerHTML = `
+            <div class="card__image">
+                <img src="https://covers.openlibrary.org/b/olid/${this.cardState.cover_edition_key}-M.jpg" alt="cover">
+            </div>
+            <div class="card__info">
+                <div class="card__tag">
+                    ${this.cardState.subject ? this.cardState.subject[0] : 'Not specified'}
+                </div>
+                <div class="card__name">
+                    ${this.cardState.title}
+                </div>
+                <div class="card__author">
+                    ${this.cardState.author_name ? this.cardState.author_name[0] : 'Not specified'}
+                </div>
+                <div class="card__footer">
+                    <button class="button_add ${existInFavorites ? 'button__active' : ''}">
+                        ${existInFavorites
+                            ? '<img src="/static/favorites.svg"  alt="favorites"/>'
+                            : '<img src="/static/favorite-white.svg"  alt="favorites"/>'
+                        }
+                    </button>
+                </div>
+            </div>
+        `;
+            return this.element;
+        }
+    }
+
     class CardList extends DivComponent {
         constructor(appState, parentState) {
             super();
@@ -1193,8 +1233,11 @@
             }
             this.element.classList.add('card_list');
             this.element.innerHTML = `
-            <h1>Books found - ${this.parentState.list.length}</h1>
+            <h1>Books found - ${this.parentState.numFound}</h1>
         `;
+            for (const card of this.parentState.list) {
+                this.element.append(new Card(this.appState, card).render());
+            }
             return this.element;
         }
     }
@@ -1202,6 +1245,7 @@
     class MainView extends AbstractView {
         state = {
             list: [],
+            numFound: 0,
             loading: false,
             searchQuery: undefined,
             offset: 0,
@@ -1226,6 +1270,8 @@
                 this.state.loading = true;
                 const data = await this.loadList(this.state.searchQuery, this.state.offset);
                 this.state.loading = false;
+                console.log(data);
+                this.state.numFound = data.numFound;
                 this.state.list = data.docs;
             }
             if (path === 'list' || path === 'loading') {
